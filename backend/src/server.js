@@ -1,5 +1,5 @@
 import app from './app.js';
-import { connectDB } from './config/db.js';
+import { connectDB, closeDB } from './config/db.js';
 import { config } from './config/env.js';
 
 const startServer = async () => {
@@ -16,13 +16,18 @@ const startServer = async () => {
       console.log(`===============================================`);
     });
 
-    // Graceful shutdown
-    process.on('SIGTERM', () => {
-      console.log('SIGTERM signal received: closing HTTP server');
-      server.close(() => {
-        console.log('HTTP server closed');
+    // Graceful shutdown with database flush
+    const handleShutdown = async (signal) => {
+      console.log(`\n${signal} received: closing HTTP server and flushing database...`);
+      server.close(async () => {
+        await closeDB();
+        console.log('HTTP server and database stopped cleanly.');
+        process.exit(0);
       });
-    });
+    };
+
+    process.on('SIGTERM', () => handleShutdown('SIGTERM'));
+    process.on('SIGINT', () => handleShutdown('SIGINT'));
   } catch (error) {
     console.error('Failed to start server:', error);
     process.exit(1);

@@ -5,3 +5,8 @@ dist/
 *.log
 uploads/*
 !uploads/.gitkeep
+data/
+backend/data/
+test_data_dir/
+test_data_persist/
+test_lock_dir/
