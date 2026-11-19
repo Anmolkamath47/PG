@@ -1,7 +1,10 @@
 import axios from 'axios';
 
+// Support VITE_API_BASE_URL (for Vercel deployment pointing to Render backend) or fallback to '/api' in local dev proxy
+const baseURL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || '/api';
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL,
   headers: {
     'Content-Type': 'application/json',
   },

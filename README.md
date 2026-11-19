@@ -153,26 +153,58 @@ d:/PG/
 - **Node.js** v18+ or v22+
 - **npm** v9+
 
-### 2. Backend Setup
+### 2. Local Setup
 ```bash
-cd backend
-npm install
-# Seed rich demo data
+# Clone the repository
+git clone https://github.com/Anmolkamath47/PG.git
+cd PG
+
+# Install dependencies
+npm run install:all
+
+# Seed database with rich realistic PG data
 npm run seed
-# Start the backend server
-npm start
-```
-The backend will start on **`http://localhost:5000`**.
 
-### 3. Frontend Setup
-```bash
-cd frontend
-npm install
-npm run dev
-```
-The frontend will start on **`http://localhost:5173`**.
+# Start backend (http://localhost:5000)
+npm run start:backend
 
-Open your browser to `http://localhost:5173/` and test using the **1-Click Demo Login**!
+# In another terminal, start frontend (http://localhost:5173)
+npm run dev:frontend
+```
+
+Open `http://localhost:5173/` and test using the **1-Click Demo Login** buttons!
+
+---
+
+## 🚀 Cloud Deployment Guide
+
+### A. Deploy Backend to Render (Node.js Web Service)
+1. Go to [Render Dashboard](https://dashboard.render.com/) and click **New +** -> **Web Service** (or use Blueprints with `render.yaml`).
+2. Connect your repository: `https://github.com/Anmolkamath47/PG.git`.
+3. Set configuration:
+   - **Root Directory**: `backend`
+   - **Build Command**: `npm install`
+   - **Start Command**: `node src/server.js`
+4. Set Environment Variables in Render:
+   - `NODE_ENV`: `production`
+   - `PORT`: `10000`
+   - `MONGODB_URI`: Your MongoDB Atlas connection string (`mongodb+srv://...`)
+   - `JWT_SECRET`: Any secure random 32+ character string
+   - `CLIENT_URL`: Your Vercel frontend URL (e.g. `https://pgmate.vercel.app`)
+   - `PAYMENT_PROVIDER`: `sandbox` (or `hyperswitch`)
+   - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`: (Optional) for image storage
+
+### B. Deploy Frontend to Vercel
+1. Go to [Vercel Dashboard](https://vercel.com/) and click **Add New** -> **Project**.
+2. Select `Anmolkamath47/PG`.
+3. Set configuration:
+   - **Framework Preset**: `Vite`
+   - **Root Directory**: `frontend`
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+4. Set Environment Variables in Vercel:
+   - `VITE_API_BASE_URL`: `https://your-render-backend-name.onrender.com/api`
+5. Click **Deploy**. Vercel will build and launch your application with full SPA routing (`vercel.json` already configured).
 
 ---
 
