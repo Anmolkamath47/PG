@@ -6,17 +6,24 @@
 
 ---
 
-## 🚀 Live Demo & Accounts
+## 🚀 Authentication & Tenant Admission Flow
 
-The application includes rich, pre-configured realistic Indian PG data ready out-of-the-box.
+PGmate enforces a secure, real-world Indian PG operations workflow:
 
-| Role | Email / Phone | Password | Features / Role |
-| :--- | :--- | :--- | :--- |
-| **PG Owner / Manager** | `owner@pgmate.in` (or `9876543210`) | `Password@123` | Full 12-section property management dashboard |
-| **Resident Tenant** | `rahul@gmail.com` (or `9876543211`) | `Password@123` | Room 101 (Bed A), verified attendance, paid rent |
-| **Resident Tenant** | `priya@gmail.com` (or `9876543212`) | `Password@123` | Room 102 (Bed A), pending rent, QR passes |
+### 1. PG Owner Registration
+- PG Owners / Wardens register directly via the **Register Your PG** portal (`/register`).
+- Sets up PG business name, owner details, and UPI collection ID.
+- Access to the full 12-section property management dashboard.
 
-> **Tip:** The Login page features **1-Click Instant Demo Login buttons** so you can switch roles immediately without manual typing!
+### 2. Tenant Admission & Auto-Generated Credentials (PDF)
+- **No public self-registration for tenants**: Tenants cannot register arbitrarily without being verified and allocated to an actual room/bed.
+- When the PG Owner adds a resident in **Tenant Management**:
+  1. The system atomically allocates the vacant bed.
+  2. A unique **Username (`name@pgname`)** is generated (e.g., `ananya@saibalajires`).
+  3. A secure temporary password is automatically generated.
+  4. An official **Admission & Login Credentials Slip (PDF)** is generated and downloaded immediately.
+  5. The Owner can reprint or download this PDF slip anytime from the Tenant Directory.
+- **Resident Login**: The tenant signs in at `/login` under the **Resident Tenant** tab using their issued Username (`name@pgname`) and password.
 
 ---
 

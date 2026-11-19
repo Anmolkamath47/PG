@@ -13,14 +13,14 @@ import { sendNotification } from '../services/notificationService.js';
 import { logAudit } from '../services/auditService.js';
 import { getTodayIST } from '../utils/dateUtils.js';
 
-// Add new tenant with bed allocation
+// Add new tenant with bed allocation & auto-generate tenant credentials slip (name@pgname)
 export const addTenant = async (req, res, next) => {
   try {
     const {
       name,
       email,
       phone,
-      password = 'Password@123',
+      password,
       bedId,
       monthlyRent,
       securityDeposit = 0,
@@ -32,10 +32,10 @@ export const addTenant = async (req, res, next) => {
       notes,
     } = req.body;
 
-    if (!name || !email || !phone || !bedId) {
+    if (!name || !phone || !bedId) {
       return res.status(400).json({
         success: false,
-        message: 'Name, email, phone, and bed selection are required.',
+        message: 'Name, phone number, and bed selection are required.',
       });
     }
 
@@ -56,36 +56,41 @@ export const addTenant = async (req, res, next) => {
       });
     }
 
-    // 2. Check if user already exists
-    let user = await User.findOne({
-      $or: [{ email: email.toLowerCase() }, { phone: phone.trim() }],
-    });
+    // 2. Generate unique username in format: name@pgname
+    const cleanFirstName = name.trim().toLowerCase().split(' ')[0].replace(/[^a-z0-9]/g, '') || 'tenant';
+    const cleanPgSlug = (bed.building.name || 'pgmate').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 12) || 'pg';
+    let generatedUsername = `${cleanFirstName}@${cleanPgSlug}`;
 
-    if (user) {
-      // Check if user already has an active allocation
-      const activeAlloc = await BedAllocation.findOne({ tenant: user._id, status: 'active' });
-      if (activeAlloc) {
-        return res.status(400).json({
-          success: false,
-          message: 'A tenant with this email or phone is already allocated to a room.',
-        });
-      }
-      user.role = 'tenant';
-      user.pgOwnerId = req.user._id;
-      user.isActive = true;
-      await user.save();
-    } else {
-      user = await User.create({
-        name,
-        email: email.toLowerCase(),
-        phone,
-        password,
-        role: 'tenant',
-        pgOwnerId: req.user._id,
-      });
+    // Ensure username uniqueness
+    let counter = 1;
+    while (await User.findOne({ username: generatedUsername })) {
+      generatedUsername = `${cleanFirstName}${counter}@${cleanPgSlug}`;
+      counter++;
     }
 
-    // 3. Atomically update Bed to occupied
+    // 3. Generate secure temporary password for admission slip
+    const generatedPassword = password && password.trim().length >= 6
+      ? password.trim()
+      : `Pass@${Math.floor(1000 + Math.random() * 9000)}`;
+
+    const tenantEmail = email && email.trim() !== ''
+      ? email.trim().toLowerCase()
+      : `${generatedUsername}.tenant`;
+
+    // 4. Create User with generated credentials
+    const user = await User.create({
+      name: name.trim(),
+      username: generatedUsername,
+      email: tenantEmail,
+      phone: phone.trim(),
+      password: generatedPassword,
+      tempPasswordPlain: generatedPassword, // preserved so owner can download/view credentials PDF anytime
+      role: 'tenant',
+      pgOwnerId: req.user._id,
+      isActive: true,
+    });
+
+    // 5. Atomically update Bed to occupied
     const rentAmount = Number(monthlyRent) || bed.monthlyRent;
     const updatedBed = await Bed.findOneAndUpdate(
       { _id: bed._id, status: 'available' },
@@ -100,13 +105,15 @@ export const addTenant = async (req, res, next) => {
     );
 
     if (!updatedBed) {
+      // Rollback user if concurrent collision
+      await User.findByIdAndDelete(user._id);
       return res.status(400).json({
         success: false,
         message: 'Bed was just allocated by another operation. Please select another bed.',
       });
     }
 
-    // 4. Create BedAllocation record
+    // 6. Create BedAllocation record
     const allocation = await BedAllocation.create({
       tenant: user._id,
       bed: bed._id,
@@ -125,40 +132,54 @@ export const addTenant = async (req, res, next) => {
     updatedBed.currentAllocation = allocation._id;
     await updatedBed.save();
 
-    // 5. Create or update Tenant record
-    let tenantProfile = await Tenant.findOne({ user: user._id });
-    if (!tenantProfile) {
-      tenantProfile = await Tenant.create({
-        user: user._id,
-        owner: req.user._id,
-        emergencyContact: emergencyContact || {},
-        occupation: occupation || 'working_professional',
-        companyOrCollege: companyOrCollege || '',
-        currentAllocation: allocation._id,
-        status: 'active',
-      });
-    } else {
-      tenantProfile.owner = req.user._id;
-      tenantProfile.currentAllocation = allocation._id;
-      tenantProfile.status = 'active';
-      if (emergencyContact) tenantProfile.emergencyContact = emergencyContact;
-      if (occupation) tenantProfile.occupation = occupation;
-      if (companyOrCollege) tenantProfile.companyOrCollege = companyOrCollege;
-      await tenantProfile.save();
-    }
+    // 7. Create Tenant Profile record
+    await Tenant.create({
+      user: user._id,
+      owner: req.user._id,
+      emergencyContact: emergencyContact || {},
+      occupation: occupation || 'working_professional',
+      companyOrCollege: companyOrCollege || '',
+      currentAllocation: allocation._id,
+      status: 'active',
+    });
 
-    // 6. Generate first month rent invoice automatically
+    // 8. Generate first month rent invoice automatically
     const currentMonthStr = getTodayIST().slice(0, 7); // 'YYYY-MM'
     await RentService.generateInvoiceForAllocation(allocation, currentMonthStr);
 
-    // 7. Audit log & Notification
+    // 9. Prepare credentials payload for Admission PDF
+    const credentials = {
+      tenantId: user._id,
+      tenantName: user.name,
+      username: generatedUsername,
+      password: generatedPassword,
+      phone: user.phone,
+      email: user.email,
+      buildingName: bed.building.name,
+      buildingAddress: `${bed.building.address?.street}, ${bed.building.address?.area}, ${bed.building.address?.city}`,
+      roomNumber: bed.room.roomNumber,
+      bedNumber: bed.bedNumber,
+      monthlyRent: allocation.monthlyRent,
+      securityDeposit: allocation.securityDeposit,
+      joiningDate: allocation.joiningDate,
+      rentDueDay: allocation.rentDueDay,
+      ownerName: req.user.name,
+      ownerPhone: req.user.phone,
+    };
+
+    // 10. Audit log & Notification
     await logAudit({
       actor: req.user._id,
       actorRole: 'owner',
       action: 'TENANT_ALLOCATED',
       entityType: 'BedAllocation',
       entityId: allocation._id,
-      details: { tenantName: user.name, roomNumber: bed.room.roomNumber, bedNumber: bed.bedNumber },
+      details: {
+        tenantName: user.name,
+        username: generatedUsername,
+        roomNumber: bed.room.roomNumber,
+        bedNumber: bed.bedNumber
+      },
       req,
     });
 
@@ -166,18 +187,18 @@ export const addTenant = async (req, res, next) => {
       recipientId: user._id,
       role: 'tenant',
       title: 'Welcome to your new room!',
-      message: `You have been allocated Bed ${bed.bedNumber} in Room ${bed.room.roomNumber} at ${bed.building.name}.`,
+      message: `Your login username is ${generatedUsername}. Bed ${bed.bedNumber} in Room ${bed.room.roomNumber} has been allocated.`,
       type: 'bed',
       relatedEntity: { entityType: 'BedAllocation', entityId: allocation._id },
     });
 
     res.status(201).json({
       success: true,
-      message: 'Tenant added and bed allocated successfully.',
+      message: 'Tenant enrolled successfully! Login credentials generated.',
       tenant: {
         id: user._id,
         name: user.name,
-        email: user.email,
+        username: generatedUsername,
         phone: user.phone,
         allocation: {
           id: allocation._id,
@@ -187,7 +208,8 @@ export const addTenant = async (req, res, next) => {
           monthlyRent: allocation.monthlyRent,
           joiningDate: allocation.joiningDate,
         }
-      }
+      },
+      credentials,
     });
   } catch (error) {
     next(error);
@@ -204,7 +226,7 @@ export const getTenants = async (req, res, next) => {
     if (status) query.status = status;
 
     const allocations = await BedAllocation.find(query)
-      .populate('tenant', 'name email phone avatar isActive createdAt')
+      .populate('tenant', 'name username email phone avatar isActive tempPasswordPlain createdAt')
       .populate('building', 'name address')
       .populate('room', 'roomNumber roomType baseRent')
       .populate('bed', 'bedNumber monthlyRent status')
@@ -216,6 +238,7 @@ export const getTenants = async (req, res, next) => {
       const q = search.trim().toLowerCase();
       filtered = allocations.filter(a =>
         a.tenant?.name?.toLowerCase().includes(q) ||
+        a.tenant?.username?.toLowerCase().includes(q) ||
         a.tenant?.phone?.includes(q) ||
         a.tenant?.email?.toLowerCase().includes(q) ||
         a.room?.roomNumber?.toLowerCase().includes(q)
@@ -232,7 +255,7 @@ export const getTenants = async (req, res, next) => {
   }
 };
 
-// Get single tenant full profile with history
+// Get single tenant full profile with credentials and history
 export const getTenantDetails = async (req, res, next) => {
   try {
     const { tenantId } = req.params;
@@ -263,9 +286,27 @@ export const getTenantDetails = async (req, res, next) => {
 
     const complaints = await Complaint.find({ tenant: tenantId }).sort('-createdAt');
 
+    const credentials = currentAllocation ? {
+      tenantId: user._id,
+      tenantName: user.name,
+      username: user.username || user.email,
+      password: user.tempPasswordPlain || 'Password@123',
+      phone: user.phone,
+      email: user.email,
+      buildingName: currentAllocation.building?.name,
+      buildingAddress: `${currentAllocation.building?.address?.street || ''}, ${currentAllocation.building?.address?.city || ''}`,
+      roomNumber: currentAllocation.room?.roomNumber,
+      bedNumber: currentAllocation.bed?.bedNumber,
+      monthlyRent: currentAllocation.monthlyRent,
+      securityDeposit: currentAllocation.securityDeposit,
+      joiningDate: currentAllocation.joiningDate,
+      rentDueDay: currentAllocation.rentDueDay,
+    } : null;
+
     res.status(200).json({
       success: true,
       user,
+      credentials,
       tenantProfile,
       currentAllocation,
       allocationHistory,
@@ -284,7 +325,6 @@ export const transferTenantBed = async (req, res, next) => {
   try {
     const { tenantId, newBedId, newMonthlyRent, reason } = req.body;
 
-    // Find current active allocation
     const currentAllocation = await BedAllocation.findOne({
       tenant: tenantId,
       status: 'active',
@@ -295,7 +335,6 @@ export const transferTenantBed = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Active allocation for tenant not found' });
     }
 
-    // Verify new bed is available
     const newBed = await Bed.findById(newBedId).populate('room').populate('building');
     if (!newBed) return res.status(404).json({ success: false, message: 'Target bed not found' });
 

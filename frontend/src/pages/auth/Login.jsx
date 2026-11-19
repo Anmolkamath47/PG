@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ShieldCheck, Mail, Lock, ArrowRight, UserCheck, KeyRound, Building } from 'lucide-react';
+import { ShieldCheck, Mail, Lock, ArrowRight, UserCheck, Building, Info, User } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useNotification } from '../../context/NotificationContext.jsx';
 
@@ -16,7 +16,7 @@ export const Login = () => {
   const handleLogin = async (e) => {
     e?.preventDefault();
     if (!identifier || !password) {
-      toast.error('Please enter email/phone and password');
+      toast.error(role === 'tenant' ? 'Please enter your username (name@pgname) and password' : 'Please enter email/phone and password');
       return;
     }
     setLoading(true);
@@ -33,12 +33,6 @@ export const Login = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const fillDemoAccount = (demoRole, email, pass) => {
-    setRole(demoRole);
-    setIdentifier(email);
-    setPassword(pass);
   };
 
   return (
@@ -89,20 +83,37 @@ export const Login = () => {
             </button>
           </div>
 
+          {/* Tenant Credential Advisory Notice */}
+          {role === 'tenant' && (
+            <div className="mb-4 p-3 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 flex items-start gap-2.5 text-xs text-emerald-200">
+              <Info className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="font-semibold text-emerald-300">Admission Credentials Required</p>
+                <p className="text-[11px] text-emerald-300/80 mt-0.5">
+                  Tenants are enrolled by their PG Owner. Use the Username (<span className="font-mono text-white font-bold">name@pgname</span>) and password from your official Admission Slip.
+                </p>
+              </div>
+            </div>
+          )}
+
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
-                Email or Mobile Number
+                {role === 'owner' ? 'Owner Email or Mobile Number' : 'Tenant Username (name@pgname) or Mobile'}
               </label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
+                {role === 'owner' ? (
+                  <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
+                ) : (
+                  <User className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
+                )}
                 <input
                   type="text"
                   required
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder={role === 'owner' ? 'owner@pgmate.in or 9876543210' : 'rahul@gmail.com or 9876543211'}
-                  className="w-full bg-slate-800/70 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all"
+                  placeholder={role === 'owner' ? 'e.g. owner@pgmate.in or 9876543210' : 'e.g. rohan@srisai or 9876543210'}
+                  className="w-full bg-slate-800/70 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all font-medium"
                 />
               </div>
             </div>
@@ -112,9 +123,11 @@ export const Login = () => {
                 <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                   Password
                 </label>
-                <a href="#demo" onClick={() => toast.info('Default password for demo accounts is Password@123')} className="text-xs text-brand-400 hover:underline">
-                  Forgot?
-                </a>
+                {role === 'owner' && (
+                  <span className="text-xs text-slate-500">
+                    Secure credentials
+                  </span>
+                )}
               </div>
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
@@ -143,72 +156,23 @@ export const Login = () => {
             </button>
           </form>
 
-          {/* 1-Click Instant Demo Accounts */}
-          <div className="mt-6 pt-5 border-t border-slate-800">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 text-center mb-3 flex items-center justify-center gap-1.5">
-              <KeyRound className="w-3.5 h-3.5 text-amber-400" />
-              <span>1-Click Instant Demo Credentials</span>
-            </p>
-
-            <div className="grid grid-cols-1 gap-2">
-              <button
-                type="button"
-                onClick={() => fillDemoAccount('owner', 'owner@pgmate.in', 'Password@123')}
-                className="flex items-center justify-between p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700/80 border border-slate-700/80 text-left transition-all group"
-              >
-                <div>
-                  <p className="text-xs font-semibold text-slate-200 group-hover:text-brand-300">
-                    🏢 PG Owner (Rajesh Sharma)
-                  </p>
-                  <p className="text-[10px] text-slate-400">owner@pgmate.in</p>
-                </div>
-                <span className="text-[10px] font-bold px-2 py-1 rounded bg-brand-500/20 text-brand-300">
-                  Select
+          {/* Registration Footer */}
+          <div className="mt-6 pt-5 border-t border-slate-800/80 text-center">
+            {role === 'owner' ? (
+              <p className="text-xs text-slate-400">
+                New PG Owner?{' '}
+                <Link to="/register" className="font-semibold text-brand-400 hover:underline">
+                  Register your PG
+                </Link>
+              </p>
+            ) : (
+              <p className="text-xs text-slate-400">
+                Don't have your login credentials yet?{' '}
+                <span className="text-slate-300 font-medium">
+                  Contact your PG Owner to obtain your admission slip.
                 </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => fillDemoAccount('tenant', 'rahul@gmail.com', 'Password@123')}
-                className="flex items-center justify-between p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700/80 border border-slate-700/80 text-left transition-all group"
-              >
-                <div>
-                  <p className="text-xs font-semibold text-slate-200 group-hover:text-emerald-300">
-                    🛏️ Tenant (Rahul Verma - Room 101)
-                  </p>
-                  <p className="text-[10px] text-slate-400">rahul@gmail.com</p>
-                </div>
-                <span className="text-[10px] font-bold px-2 py-1 rounded bg-emerald-500/20 text-emerald-300">
-                  Select
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => fillDemoAccount('tenant', 'priya@gmail.com', 'Password@123')}
-                className="flex items-center justify-between p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700/80 border border-slate-700/80 text-left transition-all group"
-              >
-                <div>
-                  <p className="text-xs font-semibold text-slate-200 group-hover:text-emerald-300">
-                    🛏️ Tenant (Priya Nair - Room 102)
-                  </p>
-                  <p className="text-[10px] text-slate-400">priya@gmail.com</p>
-                </div>
-                <span className="text-[10px] font-bold px-2 py-1 rounded bg-emerald-500/20 text-emerald-300">
-                  Select
-                </span>
-              </button>
-            </div>
-          </div>
-
-          {/* Registration Link */}
-          <div className="mt-6 text-center">
-            <p className="text-xs text-slate-400">
-              New PG Owner?{' '}
-              <Link to="/register" className="font-semibold text-brand-400 hover:underline">
-                Register your PG
-              </Link>
-            </p>
+              </p>
+            )}
           </div>
         </div>
       </div>

@@ -163,10 +163,14 @@ export const login = async (req, res, next) => {
       });
     }
 
-    // Query user by email or phone
+    // Query user by username (name@pgname), email, or phone
     const cleanId = identifier.trim().toLowerCase();
     const query = {
-      $or: [{ email: cleanId }, { phone: identifier.trim() }],
+      $or: [
+        { username: cleanId },
+        { email: cleanId },
+        { phone: identifier.trim() }
+      ],
     };
     if (role) {
       query.role = role;
@@ -225,6 +229,7 @@ export const login = async (req, res, next) => {
       user: {
         id: user._id,
         name: user.name,
+        username: user.username || user.email,
         email: user.email,
         phone: user.phone,
         role: user.role,
@@ -259,6 +264,7 @@ export const getMe = async (req, res, next) => {
       user: {
         id: user._id,
         name: user.name,
+        username: user.username || user.email,
         email: user.email,
         phone: user.phone,
         role: user.role,

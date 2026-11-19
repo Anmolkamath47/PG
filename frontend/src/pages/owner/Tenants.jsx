@@ -16,6 +16,11 @@ import {
   AlertTriangle,
   History,
   CheckCircle,
+  FileDown,
+  Copy,
+  Check,
+  FileText,
+  KeyRound,
 } from 'lucide-react';
 import { Modal } from '../../components/common/Modal.jsx';
 import { Badge } from '../../components/common/Badge.jsx';
@@ -23,6 +28,7 @@ import { Loader } from '../../components/common/Loader.jsx';
 import { EmptyState } from '../../components/common/EmptyState.jsx';
 import { formatCurrency, formatDate, formatDateTime } from '../../utils/formatters.js';
 import { useNotification } from '../../context/NotificationContext.jsx';
+import { generateCredentialsPdf } from '../../utils/generateCredentialsPdf.js';
 import api from '../../services/api.js';
 
 export const Tenants = () => {
@@ -33,6 +39,10 @@ export const Tenants = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('active');
+
+  // Credentials Generated Modal State (for newly added tenant)
+  const [credentialsModalData, setCredentialsModalData] = useState(null);
+  const [copiedField, setCopiedField] = useState(null);
 
   // Add Tenant Modal State
   const [isAddTenantOpen, setIsAddTenantOpen] = useState(false);
@@ -125,6 +135,13 @@ export const Tenants = () => {
     setIsAddTenantOpen(true);
   };
 
+  const handleCopyText = (text, fieldName) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(fieldName);
+    toast.success(`Copied ${fieldName} to clipboard`);
+    setTimeout(() => setCopiedField(null), 2500);
+  };
+
   const handleCreateTenant = async (e) => {
     e.preventDefault();
     try {
@@ -132,6 +149,28 @@ export const Tenants = () => {
       if (res.data.success) {
         toast.success(res.data.message);
         setIsAddTenantOpen(false);
+
+        // Reset add form
+        setNewTenantData({
+          name: '',
+          email: '',
+          phone: '',
+          bedId: '',
+          monthlyRent: 9500,
+          securityDeposit: 15000,
+          rentDueDay: 5,
+          joiningDate: new Date().toISOString().split('T')[0],
+          occupation: 'working_professional',
+          companyOrCollege: '',
+          emergencyContact: { name: '', relation: '', phone: '' },
+        });
+
+        // Trigger PDF generation & display credentials modal
+        if (res.data.credentials) {
+          setCredentialsModalData(res.data.credentials);
+          generateCredentialsPdf(res.data.credentials);
+        }
+
         fetchTenants();
       }
     } catch (err) {
@@ -315,12 +354,42 @@ export const Tenants = () => {
                     </td>
 
                     <td className="px-6 py-4 text-right">
-                      <button
-                        onClick={() => handleViewDetails(alloc.tenant?._id)}
-                        className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[11px] transition-colors"
-                      >
-                        View Full Profile
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => {
+                            const creds = {
+                              tenantName: alloc.tenant?.name,
+                              username: alloc.tenant?.username || alloc.tenant?.email,
+                              password: alloc.tenant?.tempPasswordPlain || 'Password@123',
+                              phone: alloc.tenant?.phone,
+                              email: alloc.tenant?.email,
+                              buildingName: alloc.building?.name,
+                              buildingAddress: alloc.building?.address
+                                ? `${alloc.building?.address?.street || ''}, ${alloc.building?.address?.city || ''}`
+                                : '',
+                              roomNumber: alloc.room?.roomNumber,
+                              bedNumber: alloc.bed?.bedNumber,
+                              monthlyRent: alloc.monthlyRent,
+                              securityDeposit: alloc.securityDeposit,
+                              rentDueDay: alloc.rentDueDay,
+                              joiningDate: alloc.joiningDate,
+                            };
+                            generateCredentialsPdf(creds);
+                            toast.success(`Downloaded Admission Slip for ${alloc.tenant?.name}`);
+                          }}
+                          title="Download Official Admission & Credentials PDF"
+                          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-[11px] border border-indigo-200/80 transition-colors shadow-sm"
+                        >
+                          <FileDown className="w-3.5 h-3.5" />
+                          <span>PDF Slip</span>
+                        </button>
+                        <button
+                          onClick={() => handleViewDetails(alloc.tenant?._id)}
+                          className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[11px] transition-colors"
+                        >
+                          View Full Profile
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -473,28 +542,61 @@ export const Tenants = () => {
         {selectedTenantDetails && (
           <div className="space-y-4">
             {/* Action Bar */}
-            {selectedTenantDetails.currentAllocation && (
-              <div className="flex gap-2 pb-3 border-b border-slate-100">
-                <button
-                  onClick={() => {
-                    fetchAvailableBeds();
-                    setIsTransferModalOpen(true);
-                  }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold border border-amber-200"
-                >
-                  <ArrowRightLeft className="w-3.5 h-3.5" />
-                  <span>Transfer Bed</span>
-                </button>
+            <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
+              <button
+                onClick={() => {
+                  if (selectedTenantDetails?.credentials) {
+                    generateCredentialsPdf(selectedTenantDetails.credentials);
+                  } else if (selectedTenantDetails?.user) {
+                    generateCredentialsPdf({
+                      tenantName: selectedTenantDetails.user.name,
+                      username: selectedTenantDetails.user.username || selectedTenantDetails.user.email,
+                      password: selectedTenantDetails.user.tempPasswordPlain || 'Password@123',
+                      phone: selectedTenantDetails.user.phone,
+                      email: selectedTenantDetails.user.email,
+                      buildingName: selectedTenantDetails.currentAllocation?.building?.name,
+                      buildingAddress: selectedTenantDetails.currentAllocation?.building?.address
+                        ? `${selectedTenantDetails.currentAllocation?.building?.address?.street || ''}, ${selectedTenantDetails.currentAllocation?.building?.address?.city || ''}`
+                        : '',
+                      roomNumber: selectedTenantDetails.currentAllocation?.room?.roomNumber,
+                      bedNumber: selectedTenantDetails.currentAllocation?.bed?.bedNumber,
+                      monthlyRent: selectedTenantDetails.currentAllocation?.monthlyRent,
+                      securityDeposit: selectedTenantDetails.currentAllocation?.securityDeposit,
+                      rentDueDay: selectedTenantDetails.currentAllocation?.rentDueDay,
+                      joiningDate: selectedTenantDetails.currentAllocation?.joiningDate,
+                    });
+                  }
+                  toast.success('Downloaded Admission & Credentials Slip PDF');
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold border border-indigo-200 transition-colors"
+              >
+                <FileDown className="w-3.5 h-3.5" />
+                <span>Download Admission Slip PDF</span>
+              </button>
 
-                <button
-                  onClick={() => setIsCheckoutModalOpen(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 text-xs font-bold border border-rose-200"
-                >
-                  <LogOut className="w-3.5 h-3.5" />
-                  <span>Checkout Resident</span>
-                </button>
-              </div>
-            )}
+              {selectedTenantDetails.currentAllocation && (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      fetchAvailableBeds();
+                      setIsTransferModalOpen(true);
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold border border-amber-200"
+                  >
+                    <ArrowRightLeft className="w-3.5 h-3.5" />
+                    <span>Transfer Bed</span>
+                  </button>
+
+                  <button
+                    onClick={() => setIsCheckoutModalOpen(true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 text-xs font-bold border border-rose-200"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>Checkout Resident</span>
+                  </button>
+                </div>
+              )}
+            </div>
 
             {/* Profile Tabs */}
             <div className="flex gap-2 border-b border-slate-200 pb-2 text-xs font-bold">
@@ -703,6 +805,135 @@ export const Tenants = () => {
             Confirm Resident Checkout & Free Bed
           </button>
         </form>
+      </Modal>
+
+      {/* Tenant Enrolled & Admission Slip Generated Success Modal */}
+      <Modal
+        isOpen={!!credentialsModalData}
+        onClose={() => setCredentialsModalData(null)}
+        title="Tenant Enrolled & Admission Slip Generated"
+        subtitle="Bed allocated successfully. Share these credentials with the resident."
+      >
+        {credentialsModalData && (
+          <div className="space-y-4">
+            {/* Success Banner */}
+            <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center flex-shrink-0">
+                <CheckCircle className="w-6 h-6" />
+              </div>
+              <div>
+                <h4 className="font-bold text-emerald-950 text-sm">
+                  {credentialsModalData.tenantName} admitted successfully!
+                </h4>
+                <p className="text-xs text-emerald-700">
+                  Allocated to {credentialsModalData.buildingName} • Room {credentialsModalData.roomNumber} ({credentialsModalData.bedNumber})
+                </p>
+              </div>
+            </div>
+
+            {/* Credentials Card */}
+            <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 text-white space-y-3 shadow-lg">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+                <span className="text-xs font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
+                  <KeyRound className="w-4 h-4 text-amber-400" />
+                  Resident Login Credentials
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-semibold">
+                  name@pgname format
+                </span>
+              </div>
+
+              {/* Username Field */}
+              <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/80">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Username (name@pgname)</span>
+                  <span className="font-mono text-sm font-bold text-emerald-400">
+                    {credentialsModalData.username}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCopyText(credentialsModalData.username, 'Username')}
+                  className="p-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white transition-colors"
+                  title="Copy Username"
+                >
+                  {copiedField === 'Username' ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                </button>
+              </div>
+
+              {/* Password Field */}
+              <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/80">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Temporary Password</span>
+                  <span className="font-mono text-sm font-bold text-rose-400">
+                    {credentialsModalData.password}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCopyText(credentialsModalData.password, 'Password')}
+                  className="p-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white transition-colors"
+                  title="Copy Password"
+                >
+                  {copiedField === 'Password' ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                </button>
+              </div>
+
+              {/* Room & Rent Summary */}
+              <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
+                <div className="p-2 rounded-lg bg-slate-800/50">
+                  <span className="text-[10px] text-slate-400 block">Room & Bed</span>
+                  <span className="font-semibold text-slate-200">Room {credentialsModalData.roomNumber} • {credentialsModalData.bedNumber}</span>
+                </div>
+                <div className="p-2 rounded-lg bg-slate-800/50">
+                  <span className="text-[10px] text-slate-400 block">Monthly Rent</span>
+                  <span className="font-semibold text-slate-200">₹{Number(credentialsModalData.monthlyRent || 0).toLocaleString('en-IN')}/mo</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Note */}
+            <p className="text-xs text-slate-500 leading-relaxed">
+              💡 The official PDF Admission Slip has been downloaded. You can WhatsApp or print it for the resident. Residents cannot self-register online; they must sign in using these exact credentials.
+            </p>
+
+            {/* Modal Actions */}
+            <div className="flex flex-col sm:flex-row gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  generateCredentialsPdf(credentialsModalData);
+                  toast.success('Downloaded Admission Slip PDF');
+                }}
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold shadow-md shadow-brand-500/20 transition-all"
+              >
+                <FileDown className="w-4 h-4" />
+                <span>Download PDF Slip Again</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const text = `Welcome to ${credentialsModalData.buildingName}!\nHere are your PGmate resident login credentials:\nUsername: ${credentialsModalData.username}\nPassword: ${credentialsModalData.password}\nLogin URL: ${window.location.origin}/login`;
+                  navigator.clipboard.writeText(text);
+                  toast.success('Copied full credentials slip to clipboard');
+                }}
+                className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-all"
+              >
+                <Copy className="w-4 h-4" />
+                <span>Copy for WhatsApp</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setCredentialsModalData(null)}
+                className="py-2.5 px-4 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold transition-all"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );

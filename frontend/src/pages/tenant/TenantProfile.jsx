@@ -71,7 +71,12 @@ export const TenantProfile = () => {
           />
           <div>
             <h3 className="font-extrabold text-slate-900 text-base">{formData.name}</h3>
-            <p className="text-xs text-slate-400">{user?.email}</p>
+            {user?.username && (
+              <p className="text-xs font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md inline-block mt-0.5 border border-emerald-200">
+                {user.username}
+              </p>
+            )}
+            <p className="text-[11px] text-slate-400 mt-0.5">{user?.phone}</p>
           </div>
         </div>
 
