@@ -9,8 +9,6 @@ import {
   CalendarCheck,
   TrendingUp,
   ArrowRight,
-  Sparkles,
-  QrCode,
   CheckCircle,
 } from 'lucide-react';
 import {
@@ -75,42 +73,6 @@ export const Overview = () => {
 
   return (
     <div className="space-y-6">
-      {/* Top Banner / Quick Action Bar */}
-      <div className="bg-gradient-to-r from-brand-900 via-slate-900 to-indigo-950 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
-        <div className="absolute right-0 top-0 w-80 h-full bg-brand-500/10 transform skew-x-12 pointer-events-none" />
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30 text-xs font-semibold mb-3">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Real-Time PG Operations</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-              Property Overview & Status
-            </h2>
-            <p className="mt-1 text-slate-300 text-sm max-w-xl">
-              Live statistics calculated from actual building records, tenant bed allocations, rent payments, and meal attendance.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <Link
-              to="/owner/scanner"
-              className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm shadow-lg shadow-emerald-500/30 transition-all hover:scale-102"
-            >
-              <QrCode className="w-4 h-4" />
-              <span>Meal QR Scanner</span>
-            </Link>
-            <Link
-              to="/owner/rooms"
-              className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-semibold text-sm backdrop-blur-md transition-all border border-white/10"
-            >
-              <BedDouble className="w-4 h-4" />
-              <span>Visual Bed Grid</span>
-            </Link>
-          </div>
-        </div>
-      </div>
-
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
