@@ -15,11 +15,12 @@ export const connectDB = async () => {
     // 1. If external MongoDB URI is specified (e.g. MongoDB Atlas or local MongoDB service)
     if (config.mongodbUri && config.mongodbUri.trim() !== '') {
       try {
-        console.log(`Connecting to configured MongoDB: ${config.mongodbUri.split('@').pop()}`);
+        console.log(`Connecting to configured MongoDB Atlas: ${config.mongodbUri.split('@').pop().split('?')[0]}`);
         const conn = await mongoose.connect(config.mongodbUri, {
-          serverSelectionTimeoutMS: 5000,
+          dbName: 'pgmate',
+          serverSelectionTimeoutMS: 8000,
         });
-        console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+        console.log(`✅ MongoDB Atlas Connected: ${conn.connection.host} (db: ${conn.connection.name})`);
         return conn;
       } catch (err) {
         console.warn(`Could not connect to external MongoDB: ${err.message}. Falling back to persistent local storage...`);
