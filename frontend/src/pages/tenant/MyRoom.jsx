@@ -49,10 +49,6 @@ export const MyRoom = () => {
       {/* Top Header */}
       <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold mb-2">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Active Room Allocation</span>
-          </div>
           <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
             <Bed className="w-6 h-6 text-brand-600" />
             <span>Room {room?.roomNumber || 'N/A'}{bed?.bedNumber ? ` - ${bed.bedNumber}` : ''}</span>

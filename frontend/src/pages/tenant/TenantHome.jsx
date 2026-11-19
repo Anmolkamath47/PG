@@ -72,10 +72,6 @@ export const TenantHome = () => {
         <div className="absolute right-0 top-0 w-80 h-full bg-emerald-500/10 transform skew-x-12 pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-semibold mb-2">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Resident Portal • {roomData?.building?.name || 'Verified PG'}</span>
-            </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
               Welcome home, {user?.name}!
             </h2>

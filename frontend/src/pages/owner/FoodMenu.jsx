@@ -135,10 +135,6 @@ export const FoodMenu = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-xs font-semibold mb-2">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Weekly Homestyle Meals Plan</span>
-          </div>
           <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
             <Utensils className="w-6 h-6 text-brand-600" />
             <span>Weekly Food Menu Management</span>

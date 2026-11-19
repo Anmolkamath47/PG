@@ -218,14 +218,16 @@ export const OwnerLayout = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Quick QR Scanner Link Button */}
-            <NavLink
-              to="/owner/scanner"
-              className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 text-xs font-semibold transition-colors shadow-xs"
-            >
-              <QrCode className="w-4 h-4 text-brand-600" />
-              <span>Open QR Scanner</span>
-            </NavLink>
+            {/* Quick QR Scanner Link Button (hidden when already on scanner) */}
+            {location.pathname !== '/owner/scanner' && (
+              <NavLink
+                to="/owner/scanner"
+                className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 text-xs font-semibold transition-colors shadow-xs"
+              >
+                <QrCode className="w-4 h-4 text-brand-600" />
+                <span>Open QR Scanner</span>
+              </NavLink>
+            )}
 
             <NavLink
               to="/owner/notifications"

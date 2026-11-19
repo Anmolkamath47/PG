@@ -223,16 +223,12 @@ export const MealQRScanner = () => {
       {/* Scanner Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold mb-2">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>High-Security One-Time QR Protocol</span>
-          </div>
           <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
             <QrCode className="w-6 h-6 text-brand-600" />
-            <span>Meal Attendance QR Scanner</span>
+            <span>Meal Attendance Scanner</span>
           </h2>
           <p className="text-xs text-slate-500 mt-1">
-            Point camera at the tenant's daily meal QR code. Validates single-use token, meal timing, and resident identity atomically.
+            Scan tenant meal QR passes or search by resident name/room.
           </p>
         </div>
 
@@ -278,16 +274,13 @@ export const MealQRScanner = () => {
 
           {!scanning && (
             <div className="text-center p-6 space-y-3">
-              <div className="w-16 h-16 rounded-2xl bg-brand-500/10 border border-brand-500/20 text-brand-400 flex items-center justify-center mx-auto">
-                <Camera className="w-8 h-8" />
+              <div className="w-14 h-14 rounded-2xl bg-brand-500/10 border border-brand-500/20 text-brand-400 flex items-center justify-center mx-auto">
+                <Camera className="w-7 h-7" />
               </div>
-              <h4 className="text-base font-bold text-white">Camera Scanner Idle</h4>
-              <p className="text-xs text-slate-400 max-w-xs">
-                Click "Start Camera Scanner" to begin scanning resident meal QR codes directly through your phone or laptop camera.
-              </p>
+              <h4 className="text-sm font-bold text-white">Camera Scanner Ready</h4>
               <button
                 onClick={startScanner}
-                className="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold shadow-md shadow-brand-500/30 transition-all"
+                className="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold shadow-md shadow-brand-500/30 transition-all"
               >
                 Activate Camera
               </button>
@@ -302,89 +295,81 @@ export const MealQRScanner = () => {
           )}
         </div>
 
-        {/* Right Column: Instant Scan Verification Card */}
+        {/* Right Column: Scan Verification & Manual Entry */}
         <div className="space-y-4">
-          <div
-            className={`rounded-3xl p-6 border shadow-sm transition-all ${
-              scanStatus === 'success'
-                ? 'bg-emerald-50/80 border-emerald-300'
-                : scanStatus === 'duplicate'
-                ? 'bg-amber-50/80 border-amber-300'
-                : scanStatus === 'expired' || scanStatus === 'invalid' || scanStatus === 'error'
-                ? 'bg-rose-50/80 border-rose-300'
-                : 'bg-white border-slate-200/80'
-            }`}
-          >
-            <div className="flex items-center gap-3 mb-4">
-              {scanStatus === 'success' ? (
-                <CheckCircle2 className="w-7 h-7 text-emerald-600 flex-shrink-0" />
-              ) : scanStatus === 'duplicate' ? (
-                <AlertTriangle className="w-7 h-7 text-amber-600 flex-shrink-0" />
-              ) : scanStatus ? (
-                <XCircle className="w-7 h-7 text-rose-600 flex-shrink-0" />
-              ) : (
-                <QrCode className="w-7 h-7 text-slate-400 flex-shrink-0" />
+          {/* Active Scan Result Banner (shown when a scan occurs) */}
+          {scanStatus && (
+            <div
+              className={`rounded-3xl p-6 border shadow-sm transition-all ${
+                scanStatus === 'success'
+                  ? 'bg-emerald-50/80 border-emerald-300'
+                  : scanStatus === 'duplicate'
+                  ? 'bg-amber-50/80 border-amber-300'
+                  : 'bg-rose-50/80 border-rose-300'
+              }`}
+            >
+              <div className="flex items-center gap-3 mb-3">
+                {scanStatus === 'success' ? (
+                  <CheckCircle2 className="w-6 h-6 text-emerald-600 flex-shrink-0" />
+                ) : scanStatus === 'duplicate' ? (
+                  <AlertTriangle className="w-6 h-6 text-amber-600 flex-shrink-0" />
+                ) : (
+                  <XCircle className="w-6 h-6 text-rose-600 flex-shrink-0" />
+                )}
+                <div>
+                  <h3 className="font-extrabold text-sm text-slate-900">
+                    {statusMessage}
+                  </h3>
+                  <p className="text-[11px] text-slate-500">Meal scan verification</p>
+                </div>
+              </div>
+
+              {/* Tenant details display on scan */}
+              {lastScanResult?.tenant && (
+                <div className="bg-white rounded-2xl p-4 border border-slate-200/60 shadow-xs space-y-3">
+                  <div className="flex items-center gap-3">
+                    <Avatar src={lastScanResult.tenant.avatar} name={lastScanResult.tenant.name} size="lg" shape="lg" />
+                    <div>
+                      <h4 className="font-bold text-slate-900 text-sm">
+                        {lastScanResult.tenant.name}
+                      </h4>
+                      <p className="text-xs font-semibold text-slate-600">
+                        Room {lastScanResult.tenant.roomNumber} • {lastScanResult.tenant.bedNumber}
+                      </p>
+                      <p className="text-[11px] text-slate-400">{lastScanResult.tenant.phone}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-xs pt-3 border-t border-slate-100">
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block">
+                        Meal Session
+                      </span>
+                      <span className="font-bold text-slate-800 capitalize">
+                        {lastScanResult.attendance?.mealType || lastScanResult.mealType || 'Breakfast'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block">
+                        Scan Time
+                      </span>
+                      <span className="font-semibold text-slate-700">
+                        {formatDateTime(lastScanResult.attendance?.scanTime || new Date())}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               )}
-              <div>
-                <h3 className="font-extrabold text-base text-slate-900">
-                  {statusMessage || 'Waiting for QR Code Scan'}
-                </h3>
-                <p className="text-xs text-slate-500">
-                  {scanStatus ? 'Scan verification result' : 'Scan a code to see resident verification'}
-                </p>
-              </div>
             </div>
+          )}
 
-            {/* Tenant details display on scan */}
-            {lastScanResult?.tenant && (
-              <div className="bg-white/90 backdrop-blur-xs rounded-2xl p-4 border border-slate-200/60 shadow-xs space-y-3">
-                <div className="flex items-center gap-3">
-                  <Avatar src={lastScanResult.tenant.avatar} name={lastScanResult.tenant.name} size="xl" shape="lg" />
-                  <div>
-                    <h4 className="font-extrabold text-slate-900 text-base">
-                      {lastScanResult.tenant.name}
-                    </h4>
-                    <p className="text-xs font-semibold text-slate-600">
-                      Room {lastScanResult.tenant.roomNumber} • {lastScanResult.tenant.bedNumber}
-                    </p>
-                    <p className="text-[11px] text-slate-400">{lastScanResult.tenant.phone}</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 text-xs pt-3 border-t border-slate-100">
-                  <div>
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block">
-                      Meal Session
-                    </span>
-                    <span className="font-bold text-slate-800 capitalize">
-                      {lastScanResult.attendance?.mealType || lastScanResult.mealType || 'Breakfast'}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block">
-                      Date & Scan Time
-                    </span>
-                    <span className="font-bold text-slate-800">
-                      {formatDateTime(lastScanResult.attendance?.scanTime || new Date())}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Manual Fallback Search Box */}
+          {/* Manual Attendance Search */}
           <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-bold text-slate-900 text-sm">Manual Search Fallback</h3>
-                <p className="text-xs text-slate-500">
-                  If resident's phone battery is discharged or camera fails
-                </p>
-              </div>
-              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600">
-                Fallback
-              </span>
+            <div>
+              <h3 className="font-bold text-slate-900 text-sm">Manual Attendance Search</h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Look up resident by name, room number, or phone
+              </p>
             </div>
 
             <form onSubmit={handleManualSearch} className="flex gap-2">
@@ -394,8 +379,8 @@ export const MealQRScanner = () => {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search resident by name or room # (e.g. Rahul or 101)"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                  placeholder="e.g. Rashmitha or 101"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium"
                 />
               </div>
               <button

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ShieldCheck, Mail, Lock, ArrowRight, UserCheck, Building, Info, User } from 'lucide-react';
+import { ShieldCheck, Mail, Lock, ArrowRight, UserCheck, Building, User } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useNotification } from '../../context/NotificationContext.jsx';
 
@@ -82,19 +82,6 @@ export const Login = () => {
               <span>Resident Tenant</span>
             </button>
           </div>
-
-          {/* Tenant Credential Advisory Notice */}
-          {role === 'tenant' && (
-            <div className="mb-4 p-3 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 flex items-start gap-2.5 text-xs text-emerald-200">
-              <Info className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="font-semibold text-emerald-300">Admission Credentials Required</p>
-                <p className="text-[11px] text-emerald-300/80 mt-0.5">
-                  Tenants are enrolled by their PG Owner. Use the Username (<span className="font-mono text-white font-bold">name@pgname</span>) and password from your official Admission Slip.
-                </p>
-              </div>
-            </div>
-          )}
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>

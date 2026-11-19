@@ -322,11 +322,8 @@ export const PayRent = () => {
 
             {/* Card Option */}
             {selectedMethod === 'card' && (
-              <div className="space-y-2 p-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs">
-                <p className="font-semibold text-slate-700">Sandbox Test Card Simulation</p>
-                <p className="text-[11px] text-slate-500">
-                  Simulates standard domestic RuPay / Visa 3D-Secure payment flow without storing sensitive numbers.
-                </p>
+              <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-600">
+                <span>Secure domestic card payment via Visa / Mastercard / RuPay</span>
               </div>
             )}
 
