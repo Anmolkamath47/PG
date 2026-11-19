@@ -96,7 +96,7 @@ export const TenantFoodMenu = () => {
                     </span>
                   </div>
                   <p className="text-slate-800 font-medium leading-relaxed">
-                    {dayMenu.breakfast?.items}
+                    {dayMenu.breakfast?.items || <span className="text-slate-400 italic">Menu not announced yet</span>}
                   </p>
                 </div>
 
@@ -112,7 +112,7 @@ export const TenantFoodMenu = () => {
                     </span>
                   </div>
                   <p className="text-slate-800 font-medium leading-relaxed">
-                    {dayMenu.lunch?.items}
+                    {dayMenu.lunch?.items || <span className="text-slate-400 italic">Menu not announced yet</span>}
                   </p>
                 </div>
 
@@ -128,7 +128,7 @@ export const TenantFoodMenu = () => {
                     </span>
                   </div>
                   <p className="text-slate-800 font-medium leading-relaxed">
-                    {dayMenu.dinner?.items}
+                    {dayMenu.dinner?.items || <span className="text-slate-400 italic">Menu not announced yet</span>}
                   </p>
                 </div>
               </div>

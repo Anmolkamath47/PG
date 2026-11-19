@@ -27,11 +27,11 @@ export const Buildings = () => {
     name: '',
     street: '',
     area: '',
-    city: 'Bengaluru',
-    state: 'Karnataka',
-    pincode: '560034',
-    contactNumber: '9876543210',
-    totalFloors: 3,
+    city: '',
+    state: '',
+    pincode: '',
+    contactNumber: '',
+    totalFloors: '',
     description: '',
     genderAllowed: 'co-living',
   });
@@ -227,6 +227,7 @@ export const Buildings = () => {
                 required
                 value={newBuilding.city}
                 onChange={(e) => setNewBuilding({ ...newBuilding, city: e.target.value })}
+                placeholder="e.g. Bengaluru"
                 className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs"
               />
             </div>
@@ -239,6 +240,7 @@ export const Buildings = () => {
                 required
                 value={newBuilding.state}
                 onChange={(e) => setNewBuilding({ ...newBuilding, state: e.target.value })}
+                placeholder="e.g. Karnataka"
                 className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs"
               />
             </div>
@@ -251,6 +253,7 @@ export const Buildings = () => {
                 required
                 value={newBuilding.pincode}
                 onChange={(e) => setNewBuilding({ ...newBuilding, pincode: e.target.value })}
+                placeholder="e.g. 560034"
                 className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs"
               />
             </div>
@@ -265,6 +268,8 @@ export const Buildings = () => {
                 type="number"
                 min="1"
                 max="20"
+                required
+                placeholder="e.g. 3"
                 value={newBuilding.totalFloors}
                 onChange={(e) => setNewBuilding({ ...newBuilding, totalFloors: e.target.value })}
                 className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs"
@@ -277,6 +282,7 @@ export const Buildings = () => {
               <input
                 type="tel"
                 required
+                placeholder="e.g. 9876543210"
                 value={newBuilding.contactNumber}
                 onChange={(e) => setNewBuilding({ ...newBuilding, contactNumber: e.target.value })}
                 className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs"

@@ -229,7 +229,6 @@ export const FoodMenu = () => {
             </label>
             <input
               type="text"
-              required
               value={dayForm.breakfast.items}
               onChange={(e) =>
                 setDayForm({
@@ -278,7 +277,6 @@ export const FoodMenu = () => {
             </label>
             <input
               type="text"
-              required
               value={dayForm.lunch.items}
               onChange={(e) =>
                 setDayForm({
@@ -327,7 +325,6 @@ export const FoodMenu = () => {
             </label>
             <input
               type="text"
-              required
               value={dayForm.dinner.items}
               onChange={(e) =>
                 setDayForm({

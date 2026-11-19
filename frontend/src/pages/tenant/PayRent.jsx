@@ -30,7 +30,7 @@ export const PayRent = () => {
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [sessionData, setSessionData] = useState(null);
   const [selectedMethod, setSelectedMethod] = useState('upi'); // 'upi', 'card', 'netbanking'
-  const [upiId, setUpiId] = useState('tenant@okhdfcbank');
+  const [upiId, setUpiId] = useState('');
   const [processing, setProcessing] = useState(false);
   const [paymentSuccessData, setPaymentSuccessData] = useState(null);
 

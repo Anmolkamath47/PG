@@ -45,7 +45,7 @@ export const RoomsBeds = () => {
     roomNumber: '',
     roomType: 'double',
     capacity: 2,
-    baseRent: 9500,
+    baseRent: '',
     attachedBathroom: true,
     acAvailable: false,
     hasBalcony: false,
@@ -53,15 +53,15 @@ export const RoomsBeds = () => {
 
   // New floor form state
   const [newFloor, setNewFloor] = useState({
-    floorNumber: 4,
-    name: '3rd Floor',
+    floorNumber: '',
+    name: '',
     description: '',
   });
 
   // New bed form state
   const [newBed, setNewBed] = useState({
-    bedNumber: 'Bed C',
-    monthlyRent: 9500,
+    bedNumber: '',
+    monthlyRent: '',
   });
 
   const fetchLayout = async () => {
@@ -124,7 +124,7 @@ export const RoomsBeds = () => {
           roomNumber: '',
           roomType: 'double',
           capacity: 2,
-          baseRent: 9500,
+          baseRent: '',
           attachedBathroom: true,
           acAvailable: false,
           hasBalcony: false,
@@ -612,8 +612,9 @@ export const RoomsBeds = () => {
               <input
                 type="number"
                 required
+                placeholder="e.g. 8000"
                 value={newRoom.baseRent}
-                onChange={(e) => setNewRoom({ ...newRoom, baseRent: Number(e.target.value) })}
+                onChange={(e) => setNewRoom({ ...newRoom, baseRent: e.target.value === '' ? '' : Number(e.target.value) })}
                 className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500"
               />
             </div>
@@ -663,8 +664,9 @@ export const RoomsBeds = () => {
             <input
               type="number"
               required
+              placeholder="e.g. 1"
               value={newFloor.floorNumber}
-              onChange={(e) => setNewFloor({ ...newFloor, floorNumber: Number(e.target.value) })}
+              onChange={(e) => setNewFloor({ ...newFloor, floorNumber: e.target.value === '' ? '' : Number(e.target.value) })}
               className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500"
             />
           </div>
@@ -677,7 +679,7 @@ export const RoomsBeds = () => {
               required
               value={newFloor.name}
               onChange={(e) => setNewFloor({ ...newFloor, name: e.target.value })}
-              placeholder="e.g. 3rd Floor"
+              placeholder="e.g. 1st Floor"
               className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500"
             />
           </div>
@@ -706,7 +708,7 @@ export const RoomsBeds = () => {
               required
               value={newBed.bedNumber}
               onChange={(e) => setNewBed({ ...newBed, bedNumber: e.target.value })}
-              placeholder="e.g. Bed C"
+              placeholder="e.g. Bed A"
               className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500"
             />
           </div>
@@ -717,8 +719,9 @@ export const RoomsBeds = () => {
             <input
               type="number"
               required
+              placeholder="e.g. 8000"
               value={newBed.monthlyRent}
-              onChange={(e) => setNewBed({ ...newBed, monthlyRent: Number(e.target.value) })}
+              onChange={(e) => setNewBed({ ...newBed, monthlyRent: e.target.value === '' ? '' : Number(e.target.value) })}
               className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500"
             />
           </div>

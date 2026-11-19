@@ -55,10 +55,10 @@ export const MyRoom = () => {
           </div>
           <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
             <Bed className="w-6 h-6 text-brand-600" />
-            <span>Room {room?.roomNumber || '101'} - {bed?.bedNumber || 'Bed A'}</span>
+            <span>Room {room?.roomNumber || 'N/A'}{bed?.bedNumber ? ` - ${bed.bedNumber}` : ''}</span>
           </h2>
           <p className="text-xs text-slate-500 mt-1">
-            {building?.name || 'Sri Sai Balaji Luxury PG'} • Floor {room?.floor || '1'}
+            {building?.name || 'Assigned Property'} • Floor {room?.floor || '1'}
           </p>
         </div>
 
@@ -67,7 +67,7 @@ export const MyRoom = () => {
             Monthly Rent
           </span>
           <span className="text-2xl font-black text-slate-900">
-            {formatCurrency(alloc?.monthlyRent || 9500)}
+            {formatCurrency(alloc?.monthlyRent || 0)}
           </span>
         </div>
       </div>
@@ -85,7 +85,7 @@ export const MyRoom = () => {
                 Sharing Type
               </span>
               <span className="font-bold text-slate-800 capitalize">
-                {room?.roomType?.replace('_', ' ') || 'Double Sharing'}
+                {room?.roomType?.replace('_', ' ') || 'Standard'}
               </span>
             </div>
 
@@ -94,7 +94,7 @@ export const MyRoom = () => {
                 Security Deposit
               </span>
               <span className="font-bold text-slate-800">
-                {formatCurrency(alloc?.securityDeposit || 15000)}
+                {formatCurrency(alloc?.securityDeposit || 0)}
               </span>
             </div>
 
@@ -123,7 +123,10 @@ export const MyRoom = () => {
               Building Amenities
             </span>
             <div className="grid grid-cols-2 gap-2 text-xs">
-              {(building?.amenities || ['High-Speed Wi-Fi', '3 Times Meals', 'Daily Cleaning', 'Hot Water', 'Power Backup', 'Washing Machine']).map((am, i) => (
+              {(building?.amenities && building.amenities.length > 0
+                ? building.amenities
+                : ['High-Speed Wi-Fi', 'Homestyle Meals', 'Daily Housekeeping', 'Hot Water', 'Power Backup', 'Security Guard']
+              ).map((am, i) => (
                 <div key={i} className="flex items-center gap-2 text-slate-700">
                   <Check className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
                   <span>{am}</span>
@@ -145,7 +148,10 @@ export const MyRoom = () => {
                 PG Address
               </span>
               <p className="font-semibold text-slate-800 mt-0.5">
-                {building?.address?.street}, {building?.address?.area}, {building?.address?.city} - {building?.address?.pincode}
+                {building?.address?.street ? `${building.address.street}, ` : ''}
+                {building?.address?.area ? `${building.address.area}, ` : ''}
+                {building?.address?.city || ''}
+                {building?.address?.pincode ? ` - ${building.address.pincode}` : ''}
               </p>
             </div>
 
@@ -154,7 +160,7 @@ export const MyRoom = () => {
                 Helpdesk & Manager Contact
               </span>
               <p className="font-bold text-slate-900 text-sm mt-0.5">
-                {building?.contactNumber || '9876543210'}
+                {building?.contactNumber || 'Contact property manager'}
               </p>
             </div>
 

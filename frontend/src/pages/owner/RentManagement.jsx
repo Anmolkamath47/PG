@@ -36,7 +36,7 @@ export const RentManagement = () => {
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [manualPayAmount, setManualPayAmount] = useState('');
   const [manualMethod, setManualMethod] = useState('manual_cash');
-  const [manualNotes, setManualNotes] = useState('Cash collected by manager');
+  const [manualNotes, setManualNotes] = useState('');
   const [processingPayment, setProcessingPayment] = useState(false);
 
   const fetchRentData = async () => {

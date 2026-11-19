@@ -54,8 +54,8 @@ export const Tenants = () => {
     email: '',
     phone: '',
     bedId: '',
-    monthlyRent: 9500,
-    securityDeposit: 15000,
+    monthlyRent: '',
+    securityDeposit: '',
     rentDueDay: 5,
     joiningDate: new Date().toISOString().split('T')[0],
     occupation: 'working_professional',
@@ -71,11 +71,11 @@ export const Tenants = () => {
   // Transfer Bed Modal State
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const [transferTargetBedId, setTransferTargetBedId] = useState('');
-  const [transferReason, setTransferReason] = useState('Resident requested room change');
+  const [transferReason, setTransferReason] = useState('');
 
   // Checkout Modal State
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
-  const [checkoutNotes, setCheckoutNotes] = useState('Completed stay period');
+  const [checkoutNotes, setCheckoutNotes] = useState('');
   const [refundDeposit, setRefundDeposit] = useState(true);
 
   const fetchTenants = async () => {
@@ -382,7 +382,7 @@ export const Tenants = () => {
                             const creds = {
                               tenantName: alloc.tenant?.name,
                               username: alloc.tenant?.username || alloc.tenant?.email,
-                              password: alloc.tenant?.tempPasswordPlain || 'Password@123',
+                              password: alloc.tenant?.tempPasswordPlain || '',
                               phone: alloc.tenant?.phone,
                               email: alloc.tenant?.email,
                               buildingName: alloc.building?.name,
@@ -512,8 +512,9 @@ export const Tenants = () => {
               <input
                 type="number"
                 required
+                placeholder="e.g. 8000"
                 value={newTenantData.monthlyRent}
-                onChange={(e) => setNewTenantData({ ...newTenantData, monthlyRent: Number(e.target.value) })}
+                onChange={(e) => setNewTenantData({ ...newTenantData, monthlyRent: e.target.value === '' ? '' : Number(e.target.value) })}
                 className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs"
               />
             </div>
@@ -523,8 +524,9 @@ export const Tenants = () => {
               </label>
               <input
                 type="number"
+                placeholder="e.g. 15000"
                 value={newTenantData.securityDeposit}
-                onChange={(e) => setNewTenantData({ ...newTenantData, securityDeposit: Number(e.target.value) })}
+                onChange={(e) => setNewTenantData({ ...newTenantData, securityDeposit: e.target.value === '' ? '' : Number(e.target.value) })}
                 className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs"
               />
             </div>
@@ -536,8 +538,9 @@ export const Tenants = () => {
                 type="number"
                 min="1"
                 max="31"
+                placeholder="e.g. 5"
                 value={newTenantData.rentDueDay}
-                onChange={(e) => setNewTenantData({ ...newTenantData, rentDueDay: Number(e.target.value) })}
+                onChange={(e) => setNewTenantData({ ...newTenantData, rentDueDay: e.target.value === '' ? '' : Number(e.target.value) })}
                 className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs"
               />
             </div>
@@ -573,7 +576,7 @@ export const Tenants = () => {
                     generateCredentialsPdf({
                       tenantName: selectedTenantDetails.user.name,
                       username: selectedTenantDetails.user.username || selectedTenantDetails.user.email,
-                      password: selectedTenantDetails.user.tempPasswordPlain || 'Password@123',
+                      password: selectedTenantDetails.user.tempPasswordPlain || '',
                       phone: selectedTenantDetails.user.phone,
                       email: selectedTenantDetails.user.email,
                       buildingName: selectedTenantDetails.currentAllocation?.building?.name,
@@ -777,6 +780,7 @@ export const Tenants = () => {
               type="text"
               value={transferReason}
               onChange={(e) => setTransferReason(e.target.value)}
+              placeholder="e.g. Resident requested room upgrade"
               className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs"
             />
           </div>
@@ -806,6 +810,7 @@ export const Tenants = () => {
               type="text"
               value={checkoutNotes}
               onChange={(e) => setCheckoutNotes(e.target.value)}
+              placeholder="e.g. Completed tenure, cleared all dues"
               className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs"
             />
           </div>

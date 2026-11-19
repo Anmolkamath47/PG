@@ -58,7 +58,15 @@ export const Avatar = ({
   const roundedClass = ROUNDED[shape] || ROUNDED.md;
   const ringClass = ring ? 'ring-1 ring-black/5 dark:ring-white/10 shadow-xs' : '';
 
-  if (src && src.trim() !== '' && !imageError) {
+  // If src is a dummy unsplash or placeholder image, ignore it and show initial letter avatar
+  const isDummyImage =
+    src &&
+    (src.includes('images.unsplash.com') ||
+      src.includes('unsplash.com') ||
+      src.includes('dummy') ||
+      src.includes('placeholder'));
+
+  if (src && src.trim() !== '' && !isDummyImage && !imageError) {
     return (
       <img
         src={src}

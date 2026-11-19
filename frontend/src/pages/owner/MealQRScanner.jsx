@@ -42,7 +42,7 @@ export const MealQRScanner = () => {
   const [manualModalOpen, setManualModalOpen] = useState(false);
   const [selectedTenantForManual, setSelectedTenantForManual] = useState(null);
   const [manualMealType, setManualMealType] = useState('breakfast');
-  const [manualNotes, setManualNotes] = useState('Manual fallback verification by manager');
+  const [manualNotes, setManualNotes] = useState('');
 
   const scannerRef = useRef(null);
 
@@ -484,6 +484,7 @@ export const MealQRScanner = () => {
                 type="text"
                 value={manualNotes}
                 onChange={(e) => setManualNotes(e.target.value)}
+                placeholder="e.g. Manual entry authorized by manager"
                 className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900"
               />
             </div>

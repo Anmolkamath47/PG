@@ -80,7 +80,7 @@ export const TenantHome = () => {
               Welcome home, {user?.name}!
             </h2>
             <p className="mt-1 text-slate-300 text-xs sm:text-sm">
-              Room {roomData?.room?.roomNumber || '101'} • {roomData?.bed?.bedNumber || 'Bed A'}
+              {roomData?.room ? `Room ${roomData.room.roomNumber} • ${roomData.bed?.bedNumber || ''}` : 'Awaiting Room Allocation'}
             </p>
           </div>
 
@@ -215,7 +215,7 @@ export const TenantHome = () => {
                   Breakfast ({todayMenu?.breakfast?.timing || '07:30 - 09:30'})
                 </span>
                 <p className="text-slate-800 mt-0.5 font-medium line-clamp-1">
-                  {todayMenu?.breakfast?.items || 'Idli, Sambar, Chutney, Tea'}
+                  {todayMenu?.breakfast?.items || 'Menu not announced yet'}
                 </p>
               </div>
 
@@ -224,7 +224,7 @@ export const TenantHome = () => {
                   Lunch ({todayMenu?.lunch?.timing || '12:30 - 14:30'})
                 </span>
                 <p className="text-slate-800 mt-0.5 font-medium line-clamp-1">
-                  {todayMenu?.lunch?.items || 'Steamed Rice, Dal Tadka, Sabzi, Roti'}
+                  {todayMenu?.lunch?.items || 'Menu not announced yet'}
                 </p>
               </div>
 
@@ -233,7 +233,7 @@ export const TenantHome = () => {
                   Dinner ({todayMenu?.dinner?.timing || '19:30 - 21:30'})
                 </span>
                 <p className="text-slate-800 mt-0.5 font-medium line-clamp-1">
-                  {todayMenu?.dinner?.items || 'Paneer Butter Masala, Roti, Rice'}
+                  {todayMenu?.dinner?.items || 'Menu not announced yet'}
                 </p>
               </div>
             </div>

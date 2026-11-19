@@ -27,7 +27,7 @@ export const Settings = () => {
     phone: user?.phone || '',
     avatar: user?.avatar || '',
     businessName: user?.businessName || '',
-    upiId: user?.upiId || 'owner@okhdfcbank',
+    upiId: user?.upiId || '',
   });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);

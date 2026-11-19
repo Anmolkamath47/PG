@@ -61,9 +61,9 @@ export const createBuilding = async (req, res, next) => {
       owner: req.user._id,
       building: building._id,
       dayOfWeek: day,
-      breakfast: { items: 'Idli, Sambar, Coconut Chutney, Tea/Coffee', timing: '07:30 - 09:30' },
-      lunch: { items: 'Steamed Rice, Dal Tadka, Seasonal Sabzi, Curd, Chapati', timing: '12:30 - 14:30' },
-      dinner: { items: 'Tawa Roti, Paneer Butter Masala, Jeera Rice, Salad', timing: '19:30 - 21:30' },
+      breakfast: { items: '', timing: '07:30 - 09:30' },
+      lunch: { items: '', timing: '12:30 - 14:30' },
+      dinner: { items: '', timing: '19:30 - 21:30' },
       isPublished: true,
     }));
     await Menu.insertMany(menus);

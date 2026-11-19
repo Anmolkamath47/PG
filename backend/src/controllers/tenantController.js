@@ -290,7 +290,7 @@ export const getTenantDetails = async (req, res, next) => {
       tenantId: user._id,
       tenantName: user.name,
       username: user.username || user.email,
-      password: user.tempPasswordPlain || 'Password@123',
+      password: user.tempPasswordPlain || '',
       phone: user.phone,
       email: user.email,
       buildingName: currentAllocation.building?.name,
