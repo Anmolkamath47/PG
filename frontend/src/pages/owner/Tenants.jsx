@@ -26,6 +26,7 @@ import { Modal } from '../../components/common/Modal.jsx';
 import { Badge } from '../../components/common/Badge.jsx';
 import { Loader } from '../../components/common/Loader.jsx';
 import { EmptyState } from '../../components/common/EmptyState.jsx';
+import { Avatar } from '../../components/common/Avatar.jsx';
 import { formatCurrency, formatDate, formatDateTime } from '../../utils/formatters.js';
 import { useNotification } from '../../context/NotificationContext.jsx';
 import { generateCredentialsPdf } from '../../utils/generateCredentialsPdf.js';
@@ -345,11 +346,7 @@ export const Tenants = () => {
                   <tr key={alloc._id} className="hover:bg-slate-50/60 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <img
-                          src={alloc.tenant?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100'}
-                          alt={alloc.tenant?.name}
-                          className="w-9 h-9 rounded-xl object-cover ring-1 ring-slate-200"
-                        />
+                        <Avatar src={alloc.tenant?.avatar} name={alloc.tenant?.name} size="md" />
                         <div>
                           <p className="font-bold text-slate-900 text-xs">{alloc.tenant?.name}</p>
                           <p className="text-[11px] text-slate-400">{alloc.tenant?.phone}</p>

@@ -22,6 +22,7 @@ import {
   Plus,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
+import { Avatar } from '../components/common/Avatar.jsx';
 import api from '../services/api.js';
 
 export const OwnerLayout = () => {
@@ -178,11 +179,7 @@ export const OwnerLayout = () => {
         <div className="p-3 border-t border-slate-800/80 bg-slate-950/40">
           <div className="flex items-center justify-between p-2 rounded-xl bg-slate-800/50">
             <div className="flex items-center gap-2.5 overflow-hidden">
-              <img
-                src={user?.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100'}
-                alt={user?.name}
-                className="w-8 h-8 rounded-lg object-cover ring-1 ring-slate-700"
-              />
+              <Avatar src={user?.avatar} name={user?.name} size="sm" shape="sm" />
               <div className="overflow-hidden">
                 <p className="text-xs font-semibold text-slate-200 truncate">{user?.name}</p>
                 <p className="text-[10px] text-slate-400 truncate">{user?.email}</p>

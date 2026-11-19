@@ -15,6 +15,7 @@ import {
 import { Loader } from '../../components/common/Loader.jsx';
 import { EmptyState } from '../../components/common/EmptyState.jsx';
 import { StatCard } from '../../components/common/StatCard.jsx';
+import { Avatar } from '../../components/common/Avatar.jsx';
 import { formatDateTime } from '../../utils/formatters.js';
 import { useNotification } from '../../context/NotificationContext.jsx';
 import api from '../../services/api.js';
@@ -209,11 +210,7 @@ export const FoodAttendance = () => {
                   <tr key={i} className="hover:bg-slate-50/60 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <img
-                          src={r.tenant?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100'}
-                          alt={r.tenant?.name}
-                          className="w-8 h-8 rounded-lg object-cover ring-1 ring-slate-200"
-                        />
+                        <Avatar src={r.tenant?.avatar} name={r.tenant?.name} size="sm" shape="sm" />
                         <div>
                           <p className="font-bold text-slate-900 text-xs">{r.tenant?.name}</p>
                           <p className="text-[11px] text-slate-400">{r.tenant?.phone}</p>

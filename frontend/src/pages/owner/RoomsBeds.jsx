@@ -20,6 +20,7 @@ import { Modal } from '../../components/common/Modal.jsx';
 import { Badge } from '../../components/common/Badge.jsx';
 import { Loader } from '../../components/common/Loader.jsx';
 import { EmptyState } from '../../components/common/EmptyState.jsx';
+import { Avatar } from '../../components/common/Avatar.jsx';
 import { formatCurrency, formatDate } from '../../utils/formatters.js';
 import { useNotification } from '../../context/NotificationContext.jsx';
 import api from '../../services/api.js';
@@ -463,11 +464,7 @@ export const RoomsBeds = () => {
             {selectedBed.status === 'occupied' && selectedBed.currentTenant && (
               <div className="p-4 bg-rose-50/60 rounded-2xl border border-rose-200 space-y-3">
                 <div className="flex items-center gap-3">
-                  <img
-                    src={selectedBed.currentTenant.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100'}
-                    alt={selectedBed.currentTenant.name}
-                    className="w-12 h-12 rounded-xl object-cover ring-2 ring-rose-200"
-                  />
+                  <Avatar src={selectedBed.currentTenant.avatar} name={selectedBed.currentTenant.name} size="lg" />
                   <div>
                     <h4 className="font-bold text-slate-900 text-sm">
                       {selectedBed.currentTenant.name}

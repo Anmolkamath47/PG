@@ -19,6 +19,7 @@ import { Modal } from '../../components/common/Modal.jsx';
 import { Badge } from '../../components/common/Badge.jsx';
 import { formatDateTime } from '../../utils/formatters.js';
 import { useNotification } from '../../context/NotificationContext.jsx';
+import { Avatar } from '../../components/common/Avatar.jsx';
 import api from '../../services/api.js';
 
 export const MealQRScanner = () => {
@@ -338,11 +339,7 @@ export const MealQRScanner = () => {
             {lastScanResult?.tenant && (
               <div className="bg-white/90 backdrop-blur-xs rounded-2xl p-4 border border-slate-200/60 shadow-xs space-y-3">
                 <div className="flex items-center gap-3">
-                  <img
-                    src={lastScanResult.tenant.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100'}
-                    alt={lastScanResult.tenant.name}
-                    className="w-14 h-14 rounded-2xl object-cover ring-2 ring-brand-200"
-                  />
+                  <Avatar src={lastScanResult.tenant.avatar} name={lastScanResult.tenant.name} size="xl" shape="lg" />
                   <div>
                     <h4 className="font-extrabold text-slate-900 text-base">
                       {lastScanResult.tenant.name}
