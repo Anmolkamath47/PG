@@ -1,7 +1,15 @@
 import axios from 'axios';
 
-// Support VITE_API_BASE_URL (for Vercel deployment pointing to Render backend) or fallback to '/api' in local dev proxy
-const baseURL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || '/api';
+// Get base URL from environment or default to '/api'
+let rawBase = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || '';
+
+let baseURL = '/api';
+if (rawBase && rawBase.trim() !== '') {
+  baseURL = rawBase.trim().replace(/\/+$/, '');
+  if (!baseURL.endsWith('/api')) {
+    baseURL = `${baseURL}/api`;
+  }
+}
 
 const api = axios.create({
   baseURL,
@@ -10,9 +18,17 @@ const api = axios.create({
   },
 });
 
-// Request interceptor to attach JWT token
+// Request interceptor to attach JWT token and normalize relative URLs
 api.interceptors.request.use(
   (config) => {
+    // When baseURL is relative '/api' and url is '/auth/login', Axios in browsers
+    // can resolve '/auth/login' against origin http://localhost:5173, dropping '/api'.
+    // Normalize to guarantee '/api' prefix is preserved:
+    if (config.baseURL === '/api' && config.url && !config.url.startsWith('/api')) {
+      config.url = `/api${config.url.startsWith('/') ? '' : '/'}${config.url}`;
+      config.baseURL = '';
+    }
+
     const token = localStorage.getItem('pgmate_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

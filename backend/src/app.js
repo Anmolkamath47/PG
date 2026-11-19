@@ -47,7 +47,7 @@ if (process.env.NODE_ENV !== 'test') {
   app.use(morgan('dev'));
 }
 
-// Rate limiting (generous for dashboard polling & QR scanner)
+// Rate limiting
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 1000,
@@ -59,30 +59,40 @@ app.use('/api', apiLimiter);
 // Serve uploads static folder
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
+// Health check endpoints
+const healthCheck = (req, res) => {
   res.status(200).json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
     service: 'PGmate API',
     version: '1.0.0',
   });
-});
+};
+app.get('/api/health', healthCheck);
+app.get('/health', healthCheck);
 
-// Mount Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/buildings', buildingRoutes);
-app.use('/api/rooms', roomRoutes);
-app.use('/api/tenants', tenantRoutes);
-app.use('/api/menu', menuRoutes);
-app.use('/api/qr', qrRoutes);
-app.use('/api/attendance', attendanceRoutes);
-app.use('/api/rent', rentRoutes);
-app.use('/api/payments', paymentRoutes);
-app.use('/api/complaints', complaintRoutes);
-app.use('/api/notifications', notificationRoutes);
-app.use('/api/analytics', analyticsRoutes);
-app.use('/api/upload', uploadRoutes);
+// Helper to mount routes with or without /api prefix
+const registerRoutes = (prefix = '') => {
+  app.use(`${prefix}/auth`, authRoutes);
+  app.use(`${prefix}/buildings`, buildingRoutes);
+  app.use(`${prefix}/rooms`, roomRoutes);
+  app.use(`${prefix}/tenants`, tenantRoutes);
+  app.use(`${prefix}/menu`, menuRoutes);
+  app.use(`${prefix}/qr`, qrRoutes);
+  app.use(`${prefix}/attendance`, attendanceRoutes);
+  app.use(`${prefix}/rent`, rentRoutes);
+  app.use(`${prefix}/payments`, paymentRoutes);
+  app.use(`${prefix}/complaints`, complaintRoutes);
+  app.use(`${prefix}/notifications`, notificationRoutes);
+  app.use(`${prefix}/analytics`, analyticsRoutes);
+  app.use(`${prefix}/upload`, uploadRoutes);
+};
+
+// Mount with /api prefix (standard REST)
+registerRoutes('/api');
+
+// Also mount without /api prefix as fallback so any client URL format works smoothly
+registerRoutes('');
 
 // 404 Handler
 app.use((req, res) => {
