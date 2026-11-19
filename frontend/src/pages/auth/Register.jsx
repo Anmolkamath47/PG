@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ShieldCheck, Mail, Lock, User, Phone, Building, ArrowRight, Info, CreditCard } from 'lucide-react';
+import { ShieldCheck, Mail, Lock, User, Phone, Building, ArrowRight, CreditCard } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useNotification } from '../../context/NotificationContext.jsx';
 
@@ -58,17 +58,6 @@ export const Register = () => {
 
         {/* Card */}
         <div className="mt-7 bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
-          {/* Tenant Notice Box */}
-          <div className="mb-6 p-3.5 rounded-2xl bg-amber-950/30 border border-amber-500/30 flex items-start gap-2.5 text-xs text-amber-200">
-            <Info className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
-            <div>
-              <p className="font-semibold text-amber-300">Are you a Tenant / Resident?</p>
-              <p className="text-[11px] text-amber-300/80 mt-0.5 leading-relaxed">
-                Public self-registration is disabled for tenants. Residents are enrolled directly by their PG Owner and issued an official <strong>Admission Credentials Slip</strong> with a Username (<span className="font-mono text-white font-bold">name@pgname</span>) and password. Please contact your PG Owner.
-              </p>
-            </div>
-          </div>
-
           <form onSubmit={handleRegister} className="space-y-4">
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
