@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext, Link } from 'react-router-dom';
 import {
   BedDouble,
   Plus,
@@ -25,7 +25,7 @@ import { useNotification } from '../../context/NotificationContext.jsx';
 import api from '../../services/api.js';
 
 export const RoomsBeds = () => {
-  const { selectedBuildingId } = useOutletContext();
+  const { selectedBuildingId, buildings } = useOutletContext();
   const { toast } = useNotification();
   const [layoutData, setLayoutData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -64,7 +64,11 @@ export const RoomsBeds = () => {
   });
 
   const fetchLayout = async () => {
-    if (!selectedBuildingId) return;
+    if (!selectedBuildingId) {
+      setLoading(false);
+      setLayoutData(null);
+      return;
+    }
     setLoading(true);
     try {
       const res = await api.get(`/rooms/layout/${selectedBuildingId}`);
@@ -181,6 +185,24 @@ export const RoomsBeds = () => {
 
   if (loading) {
     return <Loader message="Rendering visual building and bed layout..." />;
+  }
+
+  if (!selectedBuildingId && (!buildings || buildings.length === 0)) {
+    return (
+      <EmptyState
+        title="No PG Building Found"
+        description="Please create your first building under Building Management before configuring rooms and floor plans."
+        action={
+          <Link
+            to="/owner/buildings"
+            className="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold inline-flex items-center gap-2 shadow-md"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add Your First Building</span>
+          </Link>
+        }
+      />
+    );
   }
 
   const floors = layoutData?.layout || [];

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext, Link } from 'react-router-dom';
 import {
   CreditCard,
   Plus,
@@ -11,6 +11,7 @@ import {
   AlertCircle,
   FileText,
   Calendar,
+  Building,
 } from 'lucide-react';
 import { StatCard } from '../../components/common/StatCard.jsx';
 import { Badge } from '../../components/common/Badge.jsx';
@@ -22,7 +23,7 @@ import { useNotification } from '../../context/NotificationContext.jsx';
 import api from '../../services/api.js';
 
 export const RentManagement = () => {
-  const { selectedBuildingId } = useOutletContext();
+  const { selectedBuildingId, buildings } = useOutletContext();
   const { toast } = useNotification();
 
   const [month, setMonth] = useState(() => new Date().toISOString().slice(0, 7)); // 'YYYY-MM'
@@ -39,7 +40,11 @@ export const RentManagement = () => {
   const [processingPayment, setProcessingPayment] = useState(false);
 
   const fetchRentData = async () => {
-    if (!selectedBuildingId) return;
+    if (!selectedBuildingId) {
+      setLoading(false);
+      setData(null);
+      return;
+    }
     setLoading(true);
     try {
       const res = await api.get('/rent/dashboard', {
@@ -107,6 +112,28 @@ export const RentManagement = () => {
 
   const summary = data?.summary || {};
   const invoices = data?.invoices || [];
+
+  if (loading) {
+    return <Loader message="Calculating rent collections and ledger..." />;
+  }
+
+  if (!selectedBuildingId && (!buildings || buildings.length === 0)) {
+    return (
+      <EmptyState
+        title="No PG Building Found"
+        description="Please add your first PG building before monitoring rent collections and generating invoices."
+        action={
+          <Link
+            to="/owner/buildings"
+            className="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold inline-flex items-center gap-2 shadow-md"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add Your First Building</span>
+          </Link>
+        }
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">

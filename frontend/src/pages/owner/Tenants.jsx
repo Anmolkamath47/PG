@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext, useNavigate, Link } from 'react-router-dom';
 import {
   Users,
   Plus,
@@ -32,7 +32,8 @@ import { generateCredentialsPdf } from '../../utils/generateCredentialsPdf.js';
 import api from '../../services/api.js';
 
 export const Tenants = () => {
-  const { selectedBuildingId } = useOutletContext();
+  const { selectedBuildingId, buildings } = useOutletContext();
+  const navigate = useNavigate();
   const { toast } = useNotification();
 
   const [tenants, setTenants] = useState([]);
@@ -77,12 +78,13 @@ export const Tenants = () => {
   const [refundDeposit, setRefundDeposit] = useState(true);
 
   const fetchTenants = async () => {
-    if (!selectedBuildingId) return;
     setLoading(true);
     try {
-      const res = await api.get('/tenants', {
-        params: { buildingId: selectedBuildingId, status: statusFilter, search },
-      });
+      const params = { status: statusFilter, search };
+      if (selectedBuildingId) {
+        params.buildingId = selectedBuildingId;
+      }
+      const res = await api.get('/tenants', { params });
       if (res.data.success) {
         setTenants(res.data.tenants || []);
       }
@@ -94,7 +96,10 @@ export const Tenants = () => {
   };
 
   const fetchAvailableBeds = async () => {
-    if (!selectedBuildingId) return;
+    if (!selectedBuildingId) {
+      setAvailableBeds([]);
+      return;
+    }
     try {
       const res = await api.get(`/rooms/layout/${selectedBuildingId}`);
       if (res.data.success) {
@@ -131,6 +136,11 @@ export const Tenants = () => {
   }, [selectedBuildingId, statusFilter]);
 
   const handleOpenAddModal = () => {
+    if (!selectedBuildingId && (!buildings || buildings.length === 0)) {
+      toast.error('Please create your first PG building before adding tenants.');
+      navigate('/owner/buildings');
+      return;
+    }
     fetchAvailableBeds();
     setIsAddTenantOpen(true);
   };
@@ -289,16 +299,31 @@ export const Tenants = () => {
 
         {loading ? (
           <Loader message="Loading tenant directory..." />
+        ) : (!selectedBuildingId && (!buildings || buildings.length === 0)) ? (
+          <EmptyState
+            title="No PG Building Found"
+            description="You need to create your first PG building and configure rooms before allocating beds to residents."
+            action={
+              <Link
+                to="/owner/buildings"
+                className="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold inline-flex items-center gap-2 shadow-md"
+              >
+                <Building className="w-4 h-4" />
+                <span>Add Your First Building</span>
+              </Link>
+            }
+          />
         ) : filteredTenants.length === 0 ? (
           <EmptyState
             title="No tenants found"
-            description="No tenants matched the current filters or no bed allocations exist."
+            description="No tenants matched the current filters or no bed allocations exist in this building."
             action={
               <button
                 onClick={handleOpenAddModal}
-                className="px-4 py-2 rounded-xl bg-brand-600 text-white text-xs font-bold"
+                className="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-md"
               >
-                Allocate First Tenant
+                <Plus className="w-4 h-4" />
+                <span>Allocate First Tenant</span>
               </button>
             }
           />

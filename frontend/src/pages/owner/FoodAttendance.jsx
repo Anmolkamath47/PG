@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext, Link } from 'react-router-dom';
 import {
   CalendarCheck,
   Download,
@@ -9,6 +9,8 @@ import {
   Clock,
   Sparkles,
   Users,
+  Plus,
+  Building,
 } from 'lucide-react';
 import { Loader } from '../../components/common/Loader.jsx';
 import { EmptyState } from '../../components/common/EmptyState.jsx';
@@ -18,7 +20,7 @@ import { useNotification } from '../../context/NotificationContext.jsx';
 import api from '../../services/api.js';
 
 export const FoodAttendance = () => {
-  const { selectedBuildingId } = useOutletContext();
+  const { selectedBuildingId, buildings } = useOutletContext();
   const { toast } = useNotification();
 
   const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
@@ -27,7 +29,11 @@ export const FoodAttendance = () => {
   const [search, setSearch] = useState('');
 
   const fetchAttendance = async () => {
-    if (!selectedBuildingId) return;
+    if (!selectedBuildingId) {
+      setLoading(false);
+      setData(null);
+      return;
+    }
     setLoading(true);
     try {
       const res = await api.get('/attendance/report', {
@@ -76,6 +82,28 @@ export const FoodAttendance = () => {
       r.roomNumber?.toLowerCase().includes(search.toLowerCase()) ||
       r.tenant?.phone?.includes(search)
   );
+
+  if (loading) {
+    return <Loader message="Compiling food attendance records..." />;
+  }
+
+  if (!selectedBuildingId && (!buildings || buildings.length === 0)) {
+    return (
+      <EmptyState
+        title="No PG Building Found"
+        description="Please add your first PG building before monitoring daily meal scans."
+        action={
+          <Link
+            to="/owner/buildings"
+            className="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold inline-flex items-center gap-2 shadow-md"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add Your First Building</span>
+          </Link>
+        }
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">

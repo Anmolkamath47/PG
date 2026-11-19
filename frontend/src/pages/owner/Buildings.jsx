@@ -76,6 +76,7 @@ export const Buildings = () => {
         toast.success(res.data.message);
         setIsAddModalOpen(false);
         fetchBuildings();
+        window.dispatchEvent(new CustomEvent('pgmate_buildings_updated'));
       }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to create building');

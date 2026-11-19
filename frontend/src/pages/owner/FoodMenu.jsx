@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext, Link } from 'react-router-dom';
 import {
   Utensils,
   Clock,
@@ -10,13 +10,16 @@ import {
   Coffee,
   Sun,
   Moon,
+  Plus,
+  Building,
 } from 'lucide-react';
 import { Loader } from '../../components/common/Loader.jsx';
+import { EmptyState } from '../../components/common/EmptyState.jsx';
 import { useNotification } from '../../context/NotificationContext.jsx';
 import api from '../../services/api.js';
 
 export const FoodMenu = () => {
-  const { selectedBuildingId } = useOutletContext();
+  const { selectedBuildingId, buildings } = useOutletContext();
   const { toast } = useNotification();
 
   const [loading, setLoading] = useState(true);
@@ -44,7 +47,11 @@ export const FoodMenu = () => {
   ];
 
   const fetchMenu = async () => {
-    if (!selectedBuildingId) return;
+    if (!selectedBuildingId) {
+      setLoading(false);
+      setWeeklyMenu([]);
+      return;
+    }
     setLoading(true);
     try {
       const res = await api.get(`/menu/weekly/${selectedBuildingId}`);
@@ -103,6 +110,24 @@ export const FoodMenu = () => {
 
   if (loading) {
     return <Loader message="Loading weekly food menu..." />;
+  }
+
+  if (!selectedBuildingId && (!buildings || buildings.length === 0)) {
+    return (
+      <EmptyState
+        title="No PG Building Found"
+        description="Please add your first PG building before creating weekly mess menus."
+        action={
+          <Link
+            to="/owner/buildings"
+            className="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold inline-flex items-center gap-2 shadow-md"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add Your First Building</span>
+          </Link>
+        }
+      />
+    );
   }
 
   return (

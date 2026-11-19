@@ -19,6 +19,7 @@ import {
   ChevronRight,
   ShieldCheck,
   Sparkles,
+  Plus,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import api from '../services/api.js';
@@ -36,14 +37,20 @@ export const OwnerLayout = () => {
     const fetchMeta = async () => {
       try {
         const res = await api.get('/buildings');
-        if (res.data.success && res.data.buildings?.length > 0) {
-          setBuildings(res.data.buildings);
-          const savedBld = localStorage.getItem('pgmate_active_building');
-          if (savedBld && res.data.buildings.some(b => b._id === savedBld)) {
-            setSelectedBuildingId(savedBld);
+        if (res.data.success) {
+          const bList = res.data.buildings || [];
+          setBuildings(bList);
+          if (bList.length > 0) {
+            const savedBld = localStorage.getItem('pgmate_active_building');
+            if (savedBld && bList.some(b => b._id === savedBld)) {
+              setSelectedBuildingId(savedBld);
+            } else {
+              setSelectedBuildingId(bList[0]._id);
+              localStorage.setItem('pgmate_active_building', bList[0]._id);
+            }
           } else {
-            setSelectedBuildingId(res.data.buildings[0]._id);
-            localStorage.setItem('pgmate_active_building', res.data.buildings[0]._id);
+            setSelectedBuildingId('');
+            localStorage.removeItem('pgmate_active_building');
           }
         }
 
@@ -55,7 +62,10 @@ export const OwnerLayout = () => {
         console.error('Error fetching buildings:', e);
       }
     };
+
     fetchMeta();
+    window.addEventListener('pgmate_buildings_updated', fetchMeta);
+    return () => window.removeEventListener('pgmate_buildings_updated', fetchMeta);
   }, []);
 
   const handleBuildingChange = (bId) => {
@@ -234,6 +244,26 @@ export const OwnerLayout = () => {
 
         {/* Page Content Body */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-8">
+          {buildings.length === 0 && (
+            <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-brand-600 to-indigo-600 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg shadow-brand-500/20">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+                  <Building2 className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm">Welcome to PGmate! Let's get your PG set up</h4>
+                  <p className="text-xs text-brand-100">Add your first PG building to start configuring floors, rooms, beds, and admitting residents.</p>
+                </div>
+              </div>
+              <NavLink
+                to="/owner/buildings"
+                className="px-4 py-2 rounded-xl bg-white text-brand-700 hover:bg-brand-50 font-bold text-xs shadow-sm flex items-center gap-1.5 self-start sm:self-auto flex-shrink-0 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add Building Now</span>
+              </NavLink>
+            </div>
+          )}
           <Outlet context={{ selectedBuildingId, buildings }} />
         </main>
       </div>
